@@ -1,0 +1,19 @@
+main {
+  width: min(720px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 4rem 0;
+}
+
+h1 {
+  margin-bottom: 0.5rem;
+}
+
+p {
+  color: #5f6368;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+  margin-top: 2rem;
+}
