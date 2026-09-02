@@ -12,8 +12,25 @@ p {
   color: #5f6368;
 }
 
+canvas,
 img {
-  max-width: 100%;
   display: block;
+  max-width: 100%;
+  height: auto;
   margin-top: 2rem;
+}
+
+.download-link {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.35 ease;
+}
+
+.download-link:hover {
+  cursor: pointer;
+  background-color: rgb(0 0 0 /0.075);
 }
