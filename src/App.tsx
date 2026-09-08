@@ -1,4 +1,5 @@
 import "./App.css";
+import { calculateTargetDimensions } from "./image-processing/calculateTargetDimensions";
 import type { ChangeEvent } from "react";
 import { useState, useEffect } from "react";
 
@@ -43,10 +44,8 @@ function App() {
     setProcessedPreviewURL(null);
 
     const bitmap = await createImageBitmap(file);
-    const maxWidth = 1000;
-    const scale = Math.min(1, maxWidth / bitmap.width);
-    const targetWidth = Math.round(bitmap.width * scale);
-    const targetHeight = Math.round(bitmap.height * scale);
+    const { width: targetWidth, height: targetHeight } =
+      calculateTargetDimensions(bitmap.width, bitmap.height, 1000);
 
     const canvas = document.createElement("canvas");
     // Need to give the canvas workspace the correct dimensions
