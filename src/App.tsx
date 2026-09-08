@@ -1,5 +1,6 @@
 import "./App.css";
 import { calculateTargetDimensions } from "./image-processing/calculateTargetDimensions";
+import { canvasToBlob } from "./image-processing/canvasToBlob";
 import type { ChangeEvent } from "react";
 import { useState, useEffect } from "react";
 
@@ -63,26 +64,17 @@ function App() {
     context.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
     bitmap.close();
 
-    canvas.toBlob(
-      (processedBlob) => {
-        if (!processedBlob) {
-          console.log("The Canvas could not be encoded.");
-          return;
-        }
+    const processedBlob = await canvasToBlob(canvas, "image/webp", 0.82);
 
-        setProcessedPreviewURL(URL.createObjectURL(processedBlob));
+    setProcessedPreviewURL(URL.createObjectURL(processedBlob));
 
-        console.log({ processedBlob });
+    console.log({ processedBlob });
 
-        console.table({
-          type: processedBlob.type,
-          sizeInBytes: processedBlob.size,
-          sizeInMiB: (processedBlob.size / (1024 * 1024)).toFixed(2),
-        });
-      },
-      "image/webp",
-      0.82,
-    );
+    console.table({
+      type: processedBlob.type,
+      sizeInBytes: processedBlob.size,
+      sizeInMiB: (processedBlob.size / (1024 * 1024)).toFixed(2),
+    });
   };
 
   const downloadName = selectedFile
