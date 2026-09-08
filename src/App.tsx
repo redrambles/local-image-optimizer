@@ -1,6 +1,6 @@
 import "./App.css";
 import type { ChangeEvent } from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -8,7 +8,6 @@ function App() {
   const [processedPreviewURL, setProcessedPreviewURL] = useState<string | null>(
     null,
   );
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     if (!previewURL) {
@@ -44,18 +43,13 @@ function App() {
     setProcessedPreviewURL(null);
 
     const bitmap = await createImageBitmap(file);
-    const canvas = canvasRef.current;
-
-    if (!canvas) {
-      bitmap.close();
-      return;
-    }
-
     const maxWidth = 1000;
     const scale = Math.min(1, maxWidth / bitmap.width);
     const targetWidth = Math.round(bitmap.width * scale);
     const targetHeight = Math.round(bitmap.height * scale);
 
+    const canvas = document.createElement("canvas");
+    // Need to give the canvas workspace the correct dimensions
     canvas.width = targetWidth;
     canvas.height = targetHeight;
 
@@ -66,6 +60,7 @@ function App() {
       return;
     }
 
+    // tell the browser how to draw the image on the canvase workspace
     context.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
     bitmap.close();
 
@@ -115,8 +110,7 @@ function App() {
           }}
         />
       )}
-      <h2>Canvas copy</h2>
-      <canvas ref={canvasRef} />
+
       {processedPreviewURL && selectedFile && (
         <>
           <h2>Processed WebP preview</h2>
