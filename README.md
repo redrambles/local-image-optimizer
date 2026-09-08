@@ -1,5 +1,9 @@
 # React + TypeScript + Vite
 
+## Project backlog
+
+- Nice-to-have: let the user choose a meaningful output filename before downloading the optimized image (for example, replace `IMG_97487` with `mousie-at-the-window`).
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
