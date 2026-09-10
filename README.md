@@ -1,8 +1,20 @@
-# React + TypeScript + Vite
+# Browser photo lab
 
-## Project backlog
+Browser-first image optimization with React and TypeScript. Images are decoded, resized, and re-encoded locally; the processed result can be previewed and downloaded without uploading the original.
 
-- Nice-to-have: let the user choose a meaningful output filename before downloading the optimized image (for example, replace `IMG_97487` with `mousie-at-the-window`).
+## Roadmap
+
+- [x] Select, inspect, preview, resize, encode, and download an image.
+- [x] Keep the processing canvas out of the visible DOM.
+- [x] Extract and test dimension calculation and Canvas-to-Blob conversion.
+- [x] Extract a typed `processImage()` function with processing options and a structured result.
+- [x] Show original-versus-processed dimensions, format, size, and percentage reduction.
+- [ ] Add processing and error states.
+- [ ] Extract React state and object-URL cleanup into a custom hook.
+- [ ] Support the file picker, drag and drop, and clipboard paste through one entry point.
+- [ ] Add controls for maximum size, quality, output format, and output filename.
+
+Nice-to-have: let the user replace filenames such as `IMG_97487` with something meaningful before downloading.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
@@ -21,9 +33,9 @@ If you are developing a production application, we recommend updating the config
 
 ```js
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(["dist"]),
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ["**/*.{ts,tsx}"],
     extends: [
       // Other configs...
 
@@ -38,42 +50,40 @@ export default defineConfig([
     ],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
         tsconfigRootDir: import.meta.dirname,
       },
       // other options...
     },
   },
-])
-
+]);
 ```
 
 You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
 
 ```js
 // eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+import reactX from "eslint-plugin-react-x";
+import reactDom from "eslint-plugin-react-dom";
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(["dist"]),
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ["**/*.{ts,tsx}"],
     extends: [
       // Other configs...
       // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
+      reactX.configs["recommended-typescript"],
       // Enable lint rules for React DOM
       reactDom.configs.recommended,
     ],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
         tsconfigRootDir: import.meta.dirname,
       },
       // other options...
     },
   },
-])
-
+]);
 ```

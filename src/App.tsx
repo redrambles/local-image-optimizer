@@ -1,15 +1,22 @@
 import "./App.css";
-import { calculateTargetDimensions } from "./image-processing/calculateTargetDimensions";
-import { canvasToBlob } from "./image-processing/canvasToBlob";
+import {
+  processImage,
+  type ProcessImageResult,
+} from "./image-processing/processImage";
 import type { ChangeEvent } from "react";
 import { useState, useEffect } from "react";
 
+function formatFileSize(bytes: number): string {
+  return `${(bytes / 1024 / 1024).toFixed(2)} MiB`;
+}
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
   const [processedPreviewURL, setProcessedPreviewURL] = useState<string | null>(
     null,
   );
+  const [processedResult, setProcessedResult] =
+    useState<ProcessImageResult | null>(null);
 
   useEffect(() => {
     if (!previewURL) {
@@ -43,37 +50,24 @@ function App() {
     setSelectedFile(file);
     setPreviewURL(objectURL);
     setProcessedPreviewURL(null);
+    setProcessedResult(null);
 
-    const bitmap = await createImageBitmap(file);
-    const { width: targetWidth, height: targetHeight } =
-      calculateTargetDimensions(bitmap.width, bitmap.height, 1000);
+    const result = await processImage(file, {
+      maxWidth: 1000,
+      mimeType: "image/webp",
+      quality: 0.82,
+    });
 
-    const canvas = document.createElement("canvas");
-    // Need to give the canvas workspace the correct dimensions
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
+    setProcessedResult(result);
 
-    const context = canvas.getContext("2d");
+    setProcessedPreviewURL(URL.createObjectURL(result.blob));
 
-    if (!context) {
-      bitmap.close();
-      return;
-    }
-
-    // tell the browser how to draw the image on the canvase workspace
-    context.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
-    bitmap.close();
-
-    const processedBlob = await canvasToBlob(canvas, "image/webp", 0.82);
-
-    setProcessedPreviewURL(URL.createObjectURL(processedBlob));
-
-    console.log({ processedBlob });
+    console.log(result.blob);
 
     console.table({
-      type: processedBlob.type,
-      sizeInBytes: processedBlob.size,
-      sizeInMiB: (processedBlob.size / (1024 * 1024)).toFixed(2),
+      type: result.blob.type,
+      sizeInBytes: result.blob.size,
+      sizeInMiB: (result.blob.size / (1024 * 1024)).toFixed(2),
     });
   };
 
@@ -81,11 +75,70 @@ function App() {
     ? `${selectedFile.name.replace(/\.[^.]+$/, "")}-optimized.webp`
     : "optimized-image.webp";
 
+  const sizeReduction =
+    selectedFile && processedResult && selectedFile.size > 0
+      ? (1 - processedResult.blob.size / selectedFile.size) * 100
+      : null;
+
   return (
     <main>
       <h1>Browser photo lab</h1>
       <p>Choose an image to inspect and process locally.</p>
       <input type="file" accept="image/*" onChange={handleFileChange} />
+      {selectedFile && processedResult && (
+        <section className="comparison">
+          <h2 id="image-comparison-heading">Image comparison</h2>
+
+          <div
+            className="comparison-table-scroll"
+            role="region"
+            aria-labelledby="image-comparison-heading"
+            tabIndex={0}
+          >
+            <table className="comparison-table">
+              <thead>
+                <tr>
+                  <th scope="col">Metric</th>
+                  <th scope="col">Original</th>
+                  <th scope="col">Processed</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <th scope="row">Format</th>
+                  <td>{selectedFile.type}</td>
+                  <td>{processedResult.blob.type}</td>
+                </tr>
+
+                <tr>
+                  <th scope="row">Dimensions</th>
+                  <td>
+                    {processedResult.originalDimensions.width} ×{" "}
+                    {processedResult.originalDimensions.height}
+                  </td>
+                  <td>
+                    {processedResult.processedDimensions.width} ×{" "}
+                    {processedResult.processedDimensions.height}
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">File size</th>
+                  <td>{formatFileSize(selectedFile.size)}</td>
+                  <td>{formatFileSize(processedResult.blob.size)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {sizeReduction !== null && (
+            <p className="size-reduction">
+              {sizeReduction.toFixed(1)}% smaller
+            </p>
+          )}
+        </section>
+      )}
       {previewURL && selectedFile && (
         <img
           src={previewURL}

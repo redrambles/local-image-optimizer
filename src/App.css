@@ -12,7 +12,6 @@ p {
   color: #5f6368;
 }
 
-canvas,
 img {
   display: block;
   max-width: 100%;
@@ -27,10 +26,144 @@ img {
   border: 1px solid #ccc;
   text-decoration: none;
   color: inherit;
-  transition: background-color 0.35 ease;
+  transition: background-color 0.35s ease;
 }
 
 .download-link:hover {
   cursor: pointer;
   background-color: rgb(0 0 0 /0.075);
+}
+
+.comparison {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+  background: white;
+}
+
+.comparison h2 {
+  margin-top: 0;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #e5e5e5;
+  text-align: left;
+}
+
+.comparison-table thead th {
+  color: #5f6368;
+  font-size: 0.875rem;
+}
+
+.comparison-table tbody tr:last-child th,
+.comparison-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.comparison-table td {
+  font-variant-numeric: tabular-nums;
+}
+
+.size-reduction {
+  display: inline-block;
+  margin: 1rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  background: #e6f4ea;
+  color: #137333;
+  font-weight: 700;
+}
+
+.comparison-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.comparison-table {
+  width: 100%;
+  min-width: 34rem;
+}
+
+.size-reduction {
+  position: relative;
+  display: inline-block;
+  margin: 1rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+
+  color: #137333;
+  font-weight: 700;
+
+  background-color: #e6f4ea;
+  background-image: linear-gradient(#137333, #137333);
+  background-repeat: no-repeat;
+  background-position: left;
+  background-size: 0% 100%;
+
+  transition:
+    background-size 450ms ease,
+    color 200ms ease;
+}
+
+.size-reduction:hover {
+  color: white;
+  cursor: pointer;
+  background-size: 100% 100%;
+}
+
+.size-reduction::after {
+  content: "✦";
+  position: absolute;
+  top: -0.7rem;
+  right: -0.5rem;
+
+  color: #f9ab00;
+  font-size: 1rem;
+  opacity: 0;
+  pointer-events: none;
+
+  text-shadow:
+    -0.8rem 0.15rem #d96125,
+    0.65rem 0.25rem #1acde8,
+    -0.15rem -0.6rem #e634e0;
+}
+
+.size-reduction:hover::after {
+  animation: festive-burst 550ms ease-out 500ms both;
+}
+
+@keyframes festive-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.25) rotate(-20deg);
+  }
+
+  35% {
+    opacity: 1;
+    transform: scale(1.25) rotate(8deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(0.25rem, -0.5rem) scale(1.8) rotate(20deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .size-reduction {
+    transition: none;
+  }
+
+  .size-reduction:hover::after {
+    animation: none;
+  }
 }
