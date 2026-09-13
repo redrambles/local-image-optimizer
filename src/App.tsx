@@ -3,12 +3,14 @@ import {
   processImage,
   type ProcessImageResult,
 } from "./image-processing/processImage";
+import { calculateSizeChange } from "./image-processing/calculateSizeChange";
 import type { ChangeEvent } from "react";
 import { useState, useEffect } from "react";
 
 function formatFileSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(2)} MiB`;
 }
+
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
@@ -75,9 +77,9 @@ function App() {
     ? `${selectedFile.name.replace(/\.[^.]+$/, "")}-optimized.webp`
     : "optimized-image.webp";
 
-  const sizeReduction =
-    selectedFile && processedResult && selectedFile.size > 0
-      ? (1 - processedResult.blob.size / selectedFile.size) * 100
+  const sizeChange =
+    selectedFile && processedResult
+      ? calculateSizeChange(selectedFile.size, processedResult.blob.size)
       : null;
 
   return (
@@ -132,9 +134,9 @@ function App() {
             </table>
           </div>
 
-          {sizeReduction !== null && (
-            <p className="size-reduction">
-              {sizeReduction.toFixed(1)}% smaller
+          {sizeChange && (
+            <p className={`size-change size-change--${sizeChange.kind}`}>
+              {sizeChange.label}
             </p>
           )}
         </section>

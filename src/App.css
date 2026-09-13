@@ -72,16 +72,6 @@ img {
   font-variant-numeric: tabular-nums;
 }
 
-.size-reduction {
-  display: inline-block;
-  margin: 1rem 0 0;
-  padding: 0.5rem 0.75rem;
-  border-radius: 999px;
-  background: #e6f4ea;
-  color: #137333;
-  font-weight: 700;
-}
-
 .comparison-table-scroll {
   max-width: 100%;
   overflow-x: auto;
@@ -93,15 +83,18 @@ img {
   min-width: 34rem;
 }
 
-.size-reduction {
+.size-change {
   position: relative;
   display: inline-block;
   margin: 1rem 0 0;
   padding: 0.5rem 0.75rem;
   border-radius: 999px;
-
-  color: #137333;
   font-weight: 700;
+}
+
+/* Successful optimization */
+.size-change--smaller {
+  color: #137333;
 
   background-color: #e6f4ea;
   background-image: linear-gradient(#137333, #137333);
@@ -114,13 +107,13 @@ img {
     color 200ms ease;
 }
 
-.size-reduction:hover {
+.size-change--smaller:hover {
   color: white;
-  cursor: pointer;
   background-size: 100% 100%;
 }
 
-.size-reduction::after {
+/* The sparkle exists only for a successful reduction */
+.size-change--smaller::after {
   content: "✦";
   position: absolute;
   top: -0.7rem;
@@ -137,8 +130,20 @@ img {
     -0.15rem -0.6rem #e634e0;
 }
 
-.size-reduction:hover::after {
+.size-change--smaller:hover::after {
   animation: festive-burst 550ms ease-out 500ms both;
+}
+
+/* The processed file grew */
+.size-change--larger {
+  color: #8a4f00;
+  background-color: #fef3c7;
+}
+
+/* No meaningful size change */
+.size-change--same {
+  color: #5f6368;
+  background-color: #f1f3f4;
 }
 
 @keyframes festive-burst {
@@ -159,11 +164,11 @@ img {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .size-reduction {
+  .size-change--smaller {
     transition: none;
   }
 
-  .size-reduction:hover::after {
+  .size-change--smaller:hover::after {
     animation: none;
   }
 }
