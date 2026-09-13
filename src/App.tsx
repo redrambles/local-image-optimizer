@@ -11,14 +11,26 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(2)} MiB`;
 }
 
+type ProcessingState =
+  | { status: "idle" }
+  | { status: "processing" }
+  | { status: "success"; result: ProcessImageResult; previewURL: string }
+  | {
+      status: "error";
+      message: string;
+    };
+
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
-  const [processedPreviewURL, setProcessedPreviewURL] = useState<string | null>(
-    null,
-  );
-  const [processedResult, setProcessedResult] =
-    useState<ProcessImageResult | null>(null);
+  const [processingState, setProcessingState] = useState<ProcessingState>({
+    status: "idle",
+  });
+
+  const processedResult =
+    processingState.status === "success" ? processingState.result : null;
+  const processedPreviewURL =
+    processingState.status === "success" ? processingState.previewURL : null;
 
   useEffect(() => {
     if (!previewURL) {
@@ -46,31 +58,49 @@ function App() {
     if (!file) {
       return;
     }
+    // More important for when we support drag-and-drop
+    if (!file.type.startsWith("image/")) {
+      setSelectedFile(null);
+      setPreviewURL(null);
+      setProcessingState({
+        status: "error",
+        message: "Please choose an image file.",
+      });
 
+      return;
+    }
+    // We have an image, now let's create a preview and process it
     const objectURL = URL.createObjectURL(file);
 
     setSelectedFile(file);
     setPreviewURL(objectURL);
-    setProcessedPreviewURL(null);
-    setProcessedResult(null);
+    setProcessingState({ status: "processing" });
 
-    const result = await processImage(file, {
-      maxWidth: 1000,
-      mimeType: "image/webp",
-      quality: 0.82,
-    });
+    try {
+      const result = await processImage(file, {
+        maxWidth: 1000,
+        mimeType: "image/webp",
+        quality: 0.82,
+      });
 
-    setProcessedResult(result);
+      const resultURL = URL.createObjectURL(result.blob);
 
-    setProcessedPreviewURL(URL.createObjectURL(result.blob));
+      setProcessingState({
+        status: "success",
+        result,
+        previewURL: resultURL,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "The image could not be processed.";
 
-    console.log(result.blob);
-
-    console.table({
-      type: result.blob.type,
-      sizeInBytes: result.blob.size,
-      sizeInMiB: (result.blob.size / (1024 * 1024)).toFixed(2),
-    });
+      setProcessingState({
+        status: "error",
+        message,
+      });
+    }
   };
 
   const downloadName = selectedFile
@@ -86,7 +116,19 @@ function App() {
     <main>
       <h1>Browser photo lab</h1>
       <p>Choose an image to inspect and process locally.</p>
-      <input type="file" accept="image/*" onChange={handleFileChange} />
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        disabled={processingState.status === "processing"}
+      />
+      {processingState.status === "processing" && (
+        <p role="status">Processing image…</p>
+      )}
+
+      {processingState.status === "error" && (
+        <p role="alert">{processingState.message}</p>
+      )}
       {selectedFile && processedResult && (
         <section className="comparison">
           <h2 id="image-comparison-heading">Image comparison</h2>
