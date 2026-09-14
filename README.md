@@ -21,7 +21,7 @@ Adventures project, which can later reuse the processing work developed here.
 
 - [x] Extract the processing lifecycle, React state, and object-URL cleanup into a `useImageProcessor()` hook.
 - [ ] Add controls for maximum dimension, output format, compression quality, and output filename.
-- [ ] Introduce an explicit Optimize action so selecting a file and processing it are separate steps.
+- [x] Introduce an explicit Optimize action so selecting a file and processing it are separate steps.
 - [ ] Complete the idle, ready, processing, success, error, reset, and reprocess experiences.
 - [ ] Add focused tests for the processing lifecycle and user-facing workflow.
 - [ ] Remove learning-only console output.

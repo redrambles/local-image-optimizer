@@ -14,10 +14,11 @@ function App() {
     originalPreviewURL,
     processedPreviewURL,
     processedResult,
-    processFile,
+    selectFile,
+    optimizeImage,
   } = useImageProcessor();
 
-  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     // e.currentTarget.files is an array-like object
     const file = e.currentTarget.files?.[0];
 
@@ -25,7 +26,15 @@ function App() {
       return;
     }
 
-    await processFile(file);
+    selectFile(file);
+  };
+
+  const handleOptimize = async () => {
+    await optimizeImage({
+      maxWidth: 1000,
+      mimeType: "image/webp",
+      quality: 0.82,
+    });
   };
 
   const downloadName = selectedFile
@@ -44,7 +53,7 @@ function App() {
       <input
         type="file"
         accept="image/*"
-        onChange={handleFileChange}
+        onChange={handleFileSelect}
         disabled={processingState.status === "processing"}
       />
       {processingState.status === "processing" && (
@@ -54,6 +63,19 @@ function App() {
       {processingState.status === "error" && (
         <p role="alert">{processingState.message}</p>
       )}
+
+      {selectedFile && (
+        <button
+          type="button"
+          onClick={handleOptimize}
+          disabled={processingState.status === "processing"}
+        >
+          {processingState.status === "processing"
+            ? "Optimizing..."
+            : "Optimize image"}
+        </button>
+      )}
+
       {selectedFile && processedResult && (
         <section className="comparison">
           <h2 id="image-comparison-heading">Image comparison</h2>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import {
     processImage,
+    type ProcessImageOptions,
     type ProcessImageResult,
 } from "../image-processing/processImage";
 
@@ -8,6 +9,7 @@ type ProcessingState =
     | { status: "idle" }
     | { status: "processing" }
     | { status: "success"; result: ProcessImageResult; previewURL: string }
+    | { status: "ready" }
     | {
         status: "error";
         message: string;
@@ -44,8 +46,7 @@ export function useImageProcessor() {
         };
     }, [processedPreviewURL]);
 
-    async function processFile(file: File): Promise<void> {
-
+    function selectFile(file: File): void {
         // More important for when we support drag-and-drop
         if (!file.type.startsWith("image/")) {
             setSelectedFile(null);
@@ -62,14 +63,18 @@ export function useImageProcessor() {
 
         setSelectedFile(file);
         setOriginalPreviewURL(objectURL);
+        setProcessingState({ status: "ready" })
+    }
+
+    async function optimizeImage(options: ProcessImageOptions): Promise<void> {
+        if (!selectedFile) {
+            return
+        }
+
         setProcessingState({ status: "processing" });
 
         try {
-            const result = await processImage(file, {
-                maxWidth: 1000,
-                mimeType: "image/webp",
-                quality: 0.82,
-            });
+            const result = await processImage(selectedFile, options);
 
             const resultURL = URL.createObjectURL(result.blob);
 
@@ -97,6 +102,7 @@ export function useImageProcessor() {
         originalPreviewURL,
         processedPreviewURL,
         processedResult,
-        processFile,
+        selectFile,
+        optimizeImage
     }
 };
