@@ -1,106 +1,31 @@
 import "./App.css";
-import {
-  processImage,
-  type ProcessImageResult,
-} from "./image-processing/processImage";
 import { calculateSizeChange } from "./image-processing/calculateSizeChange";
 import type { ChangeEvent } from "react";
-import { useState, useEffect } from "react";
+import { useImageProcessor } from "./hooks/useImageProcessor";
 
 function formatFileSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(2)} MiB`;
 }
 
-type ProcessingState =
-  | { status: "idle" }
-  | { status: "processing" }
-  | { status: "success"; result: ProcessImageResult; previewURL: string }
-  | {
-      status: "error";
-      message: string;
-    };
-
 function App() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewURL, setPreviewURL] = useState<string | null>(null);
-  const [processingState, setProcessingState] = useState<ProcessingState>({
-    status: "idle",
-  });
-
-  const processedResult =
-    processingState.status === "success" ? processingState.result : null;
-  const processedPreviewURL =
-    processingState.status === "success" ? processingState.previewURL : null;
-
-  useEffect(() => {
-    if (!previewURL) {
-      return;
-    }
-
-    return () => {
-      // Clean up the object URL when the component unmounts or when a new file is selected
-      URL.revokeObjectURL(previewURL);
-    };
-  }, [previewURL]);
-
-  useEffect(() => {
-    if (!processedPreviewURL) return;
-
-    return () => {
-      URL.revokeObjectURL(processedPreviewURL);
-    };
-  }, [processedPreviewURL]);
+  const {
+    selectedFile,
+    processingState,
+    originalPreviewURL,
+    processedPreviewURL,
+    processedResult,
+    processFile,
+  } = useImageProcessor();
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    // e.target.files is an array-like object
-    const file = e.target.files?.[0];
+    // e.currentTarget.files is an array-like object
+    const file = e.currentTarget.files?.[0];
 
     if (!file) {
       return;
     }
-    // More important for when we support drag-and-drop
-    if (!file.type.startsWith("image/")) {
-      setSelectedFile(null);
-      setPreviewURL(null);
-      setProcessingState({
-        status: "error",
-        message: "Please choose an image file.",
-      });
 
-      return;
-    }
-    // We have an image, now let's create a preview and process it
-    const objectURL = URL.createObjectURL(file);
-
-    setSelectedFile(file);
-    setPreviewURL(objectURL);
-    setProcessingState({ status: "processing" });
-
-    try {
-      const result = await processImage(file, {
-        maxWidth: 1000,
-        mimeType: "image/webp",
-        quality: 0.82,
-      });
-
-      const resultURL = URL.createObjectURL(result.blob);
-
-      setProcessingState({
-        status: "success",
-        result,
-        previewURL: resultURL,
-      });
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "The image could not be processed.";
-
-      setProcessingState({
-        status: "error",
-        message,
-      });
-    }
+    await processFile(file);
   };
 
   const downloadName = selectedFile
@@ -183,9 +108,9 @@ function App() {
           )}
         </section>
       )}
-      {previewURL && selectedFile && (
+      {originalPreviewURL && selectedFile && (
         <img
-          src={previewURL}
+          src={originalPreviewURL}
           alt={`Preview of ${selectedFile.name}`}
           onLoad={(e) => {
             const image = e.currentTarget;
