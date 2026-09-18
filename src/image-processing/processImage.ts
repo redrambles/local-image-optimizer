@@ -1,5 +1,6 @@
 import { calculateTargetDimensions, type ImageDimensions } from "./calculateTargetDimensions";
 import { canvasToBlob } from "./canvasToBlob";
+import { isValidMaxDimension } from "./isValidMaxDimension";
 
 export type OutputMimeType =
     | "image/webp"
@@ -7,7 +8,7 @@ export type OutputMimeType =
     | "image/png";
 
 export type ProcessImageOptions = {
-    maxWidth: number;
+    maxDimension: number;
     mimeType: OutputMimeType;
     quality?: number;
 }
@@ -24,6 +25,12 @@ export async function processImage(
     options: ProcessImageOptions
 ): Promise<ProcessImageResult> {
 
+
+    if (!isValidMaxDimension(options.maxDimension)) {
+        throw new Error("The maximum dimension must be a positive integer.")
+    };
+
+
     const bitmap = await createImageBitmap(source);
 
     const originalDimensions: ImageDimensions = {
@@ -35,7 +42,7 @@ export async function processImage(
         const processedDimensions = calculateTargetDimensions(
             bitmap.width,
             bitmap.height,
-            options.maxWidth
+            options.maxDimension
         )
 
         const canvas = document.createElement("canvas");

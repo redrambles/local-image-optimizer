@@ -11,7 +11,7 @@ test("scales down a landscape image while preserving its proportions", () => {
     });
 });
 
-test("it does not upscale an image that is narrower than the maximum width", () => {
+test("it does not upscale an image that is narrower than the maximum dimension", () => {
     const result = calculateTargetDimensions(800, 600, 1000);
 
     expect(result).toEqual({
@@ -29,3 +29,11 @@ test("it preserves the proportions of a square image", () => {
     })
 })
 
+test("scales down a portrait image so neither dimension exceeds the maximum", () => {
+    const result = calculateTargetDimensions(3000, 4000, 1000);
+
+    expect(result).toEqual({
+        width: 750,
+        height: 1000
+    });
+});

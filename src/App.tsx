@@ -1,13 +1,19 @@
 import "./App.css";
+import { useState } from "react";
 import { calculateSizeChange } from "./image-processing/calculateSizeChange";
 import type { ChangeEvent } from "react";
 import { useImageProcessor } from "./hooks/useImageProcessor";
+import { isValidMaxDimension } from "./image-processing/isValidMaxDimension";
 
 function formatFileSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(2)} MiB`;
 }
 
 function App() {
+  const [maxDimensionInput, setMaxDimensionInput] = useState("1000");
+  // derive from state
+  const maxDimension = Number(maxDimensionInput);
+  const isMaxDimensionValid = isValidMaxDimension(maxDimension);
   const {
     selectedFile,
     processingState,
@@ -30,8 +36,11 @@ function App() {
   };
 
   const handleOptimize = async () => {
+    if (!isMaxDimensionValid) {
+      return;
+    }
     await optimizeImage({
-      maxWidth: 1000,
+      maxDimension,
       mimeType: "image/webp",
       quality: 0.82,
     });
@@ -50,12 +59,50 @@ function App() {
     <main>
       <h1>Browser photo lab</h1>
       <p>Choose an image to inspect and process locally.</p>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        disabled={processingState.status === "processing"}
-      />
+      <div className="controls">
+        <div className="control">
+          <label htmlFor="image-file">Image file</label>
+          <input
+            id="image-file"
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            disabled={processingState.status === "processing"}
+          />
+        </div>
+        <div className="control">
+          <label htmlFor="max-dimension">Maximum width or height (px)</label>
+
+          <input
+            id="max-dimension"
+            type="number"
+            aria-invalid={!isMaxDimensionValid}
+            aria-describedby={
+              isMaxDimensionValid
+                ? "max-dimension-help"
+                : "max-dimension-help max-dimension-error"
+            }
+            min="1"
+            step="1"
+            value={maxDimensionInput}
+            onChange={(event) => {
+              const desiredDimension = event.currentTarget.value;
+              setMaxDimensionInput(desiredDimension);
+            }}
+            disabled={processingState.status === "processing"}
+          />
+          <p id="max-dimension-help" className="control-help">
+            Neither dimension will exceed this value. Smaller images will not be
+            enlarged.
+          </p>
+          {!isMaxDimensionValid && (
+            <p id="max-dimension-error" className="control-error">
+              Enter a positive whole number.
+            </p>
+          )}
+        </div>
+      </div>
+
       {processingState.status === "processing" && (
         <p role="status">Processing image…</p>
       )}
@@ -68,7 +115,9 @@ function App() {
         <button
           type="button"
           onClick={handleOptimize}
-          disabled={processingState.status === "processing"}
+          disabled={
+            processingState.status === "processing" || !isMaxDimensionValid
+          }
         >
           {processingState.status === "processing"
             ? "Optimizing..."

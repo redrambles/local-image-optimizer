@@ -6,9 +6,10 @@ export type ImageDimensions = {
 export function calculateTargetDimensions(
   originalWidth: number,
   originalHeight: number,
-  maxWidth: number,
+  maxDimension: number,
 ): ImageDimensions {
-  const scale = Math.min(1, maxWidth / originalWidth);
+  const maxOriginalDimension = Math.max(originalWidth, originalHeight);
+  const scale = Math.min(1, maxDimension / maxOriginalDimension);
   const width = Math.round(originalWidth * scale);
   const height = Math.round(originalHeight * scale);
 

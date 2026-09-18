@@ -84,7 +84,7 @@ test("Optimizing a valid image file calls processImage and returns success", asy
     });
 
     const options: ProcessImageOptions = {
-        maxWidth: 1000,
+        maxDimension: 1000,
         mimeType: "image/webp",
         quality: 0.82
     }
