@@ -26,6 +26,7 @@ function App() {
   } = useImageProcessor();
   const [outputMimeType, setOutputMimeType] =
     useState<OutputMimeType>("image/webp");
+  const [compressionQuality, setCompressionQuality] = useState<number>(82);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     // e.currentTarget.files is an array-like object
@@ -45,7 +46,8 @@ function App() {
     await optimizeImage({
       maxDimension,
       mimeType: outputMimeType,
-      quality: 0.82,
+      quality:
+        outputMimeType === "image/png" ? undefined : compressionQuality / 100,
     });
   };
 
@@ -121,6 +123,32 @@ function App() {
             <option value="image/jpeg">JPEG</option>
             <option value="image/png">PNG</option>
           </select>
+        </div>
+        <div className="control">
+          <label htmlFor="compression-quality">
+            Compression quality {compressionQuality}%
+          </label>
+          <input
+            id="compression-quality"
+            type="range"
+            step="1"
+            value={compressionQuality}
+            onChange={(e) =>
+              setCompressionQuality(e.currentTarget.valueAsNumber)
+            }
+            disabled={
+              processingState.status === "processing" ||
+              outputMimeType === "image/png"
+            }
+            aria-describedby="compression-quality-help"
+            min="1"
+            max="100"
+          />
+          <p id="compression-quality-help" className="control-help">
+            {outputMimeType === "image/png"
+              ? "PNG uses lossless encoding, so this setting does not apply."
+              : "Higher quality usually produces a larger file."}
+          </p>
         </div>
       </div>
 
