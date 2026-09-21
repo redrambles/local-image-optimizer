@@ -23,6 +23,7 @@ Adventures project, which can later reuse the processing work developed here.
 - [ ] Add controls for maximum dimension, output format, compression quality, and output filename.
 - [x] Introduce an explicit Optimize action so selecting a file and processing it are separate steps.
 - [ ] Complete the idle, ready, processing, success, error, reset, and reprocess experiences.
+  - [ ] Preserve the previous preview and comparison while reprocessing, with a visible updating state.
 - [ ] Add focused tests for the processing lifecycle and user-facing workflow.
 - [ ] Remove learning-only console output.
 - [ ] Complete an accessibility, narrow-screen, documentation, and production-build review.

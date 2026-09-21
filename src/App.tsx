@@ -4,6 +4,7 @@ import { calculateSizeChange } from "./image-processing/calculateSizeChange";
 import type { ChangeEvent } from "react";
 import { useImageProcessor } from "./hooks/useImageProcessor";
 import { isValidMaxDimension } from "./image-processing/isValidMaxDimension";
+import type { OutputMimeType } from "./image-processing/processImage";
 
 function formatFileSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(2)} MiB`;
@@ -23,6 +24,8 @@ function App() {
     selectFile,
     optimizeImage,
   } = useImageProcessor();
+  const [outputMimeType, setOutputMimeType] =
+    useState<OutputMimeType>("image/webp");
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     // e.currentTarget.files is an array-like object
@@ -41,14 +44,17 @@ function App() {
     }
     await optimizeImage({
       maxDimension,
-      mimeType: "image/webp",
+      mimeType: outputMimeType,
       quality: 0.82,
     });
   };
 
-  const downloadName = selectedFile
-    ? `${selectedFile.name.replace(/\.[^.]+$/, "")}-optimized.webp`
-    : "optimized-image.webp";
+  const formattedMimeForDownload = processedResult?.blob.type.split("/")[1];
+
+  const downloadName =
+    selectedFile && formattedMimeForDownload
+      ? `${selectedFile.name.replace(/\.[^.]+$/, "")}-optimized.${formattedMimeForDownload}`
+      : "optimized-image.webp";
 
   const sizeChange =
     selectedFile && processedResult
@@ -100,6 +106,21 @@ function App() {
               Enter a positive whole number.
             </p>
           )}
+        </div>
+        <div className="control">
+          <label htmlFor="output-format">Output format</label>
+          <select
+            id="output-format"
+            value={outputMimeType}
+            onChange={(e) =>
+              setOutputMimeType(e.currentTarget.value as OutputMimeType)
+            }
+            disabled={processingState.status === "processing"}
+          >
+            <option value="image/webp">WebP</option>
+            <option value="image/jpeg">JPEG</option>
+            <option value="image/png">PNG</option>
+          </select>
         </div>
       </div>
 
@@ -195,9 +216,9 @@ function App() {
         />
       )}
 
-      {processedPreviewURL && selectedFile && (
+      {processedPreviewURL && selectedFile && downloadName && (
         <>
-          <h2>Processed WebP preview</h2>
+          <h2>Processed preview</h2>
 
           <img
             src={processedPreviewURL}
