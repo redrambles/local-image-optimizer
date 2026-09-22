@@ -27,6 +27,7 @@ function App() {
   const [outputMimeType, setOutputMimeType] =
     useState<OutputMimeType>("image/webp");
   const [compressionQuality, setCompressionQuality] = useState<number>(82);
+  const [outputFileName, setOutputFileName] = useState("");
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     // e.currentTarget.files is an array-like object
@@ -35,7 +36,9 @@ function App() {
     if (!file) {
       return;
     }
+    const originalNameWithoutExtension = file.name.replace(/\.[^.]+$/, "");
 
+    setOutputFileName(`${originalNameWithoutExtension}-optimized`);
     selectFile(file);
   };
 
@@ -52,11 +55,10 @@ function App() {
   };
 
   const formattedMimeForDownload = processedResult?.blob.type.split("/")[1];
-
-  const downloadName =
-    selectedFile && formattedMimeForDownload
-      ? `${selectedFile.name.replace(/\.[^.]+$/, "")}-optimized.${formattedMimeForDownload}`
-      : "optimized-image.webp";
+  const outputFileNameBase = outputFileName.trim() || "optimized-image";
+  const downloadName = formattedMimeForDownload
+    ? `${outputFileNameBase}.${formattedMimeForDownload}`
+    : null;
 
   const sizeChange =
     selectedFile && processedResult
@@ -148,6 +150,20 @@ function App() {
             {outputMimeType === "image/png"
               ? "PNG uses lossless encoding, so this setting does not apply."
               : "Higher quality usually produces a larger file."}
+          </p>
+        </div>
+        <div className="control">
+          <label htmlFor="output-filename">Output filename</label>
+          <input
+            id="output-filename"
+            aria-describedby="output-filename-help"
+            value={outputFileName}
+            onChange={(e) => setOutputFileName(e.currentTarget.value)}
+            type="text"
+            disabled={!selectedFile || processingState.status === "processing"}
+          />
+          <p id="output-filename-help" className="control-help">
+            The appropriate file extension will be added automatically.
           </p>
         </div>
       </div>
