@@ -5,14 +5,20 @@ import {
     type ProcessImageResult,
 } from "../image-processing/processImage";
 
+type ProcessedOutput = {
+    result: ProcessImageResult;
+    previewURL: string
+}
 type ProcessingState =
+
     | { status: "idle" }
-    | { status: "processing" }
-    | { status: "success"; result: ProcessImageResult; previewURL: string }
     | { status: "ready" }
+    | { status: "processing"; previousOutput: ProcessedOutput | null }
+    | { status: "success"; output: ProcessedOutput }
     | {
         status: "error";
         message: string;
+        previousOutput: ProcessedOutput | null;
     };
 
 export function useImageProcessor() {
@@ -22,10 +28,16 @@ export function useImageProcessor() {
     const [processingState, setProcessingState] = useState<ProcessingState>({
         status: "idle",
     });
-    const processedResult =
-        processingState.status === "success" ? processingState.result : null;
-    const processedPreviewURL =
-        processingState.status === "success" ? processingState.previewURL : null;
+
+    let processedOutput: ProcessedOutput | null = null;
+    if (processingState.status === "success") {
+        processedOutput = processingState.output
+    } else if (processingState.status === "processing" || processingState.status === "error") {
+        processedOutput = processingState.previousOutput
+    }
+
+    const processedResult = processedOutput?.result ?? null;
+    const processedPreviewURL = processedOutput?.previewURL ?? null;
 
     useEffect(() => {
         if (!originalPreviewURL) {
@@ -54,6 +66,7 @@ export function useImageProcessor() {
             setProcessingState({
                 status: "error",
                 message: "Please choose an image file.",
+                previousOutput: null // selecting an invalid file should not show previous output
             });
 
             return;
@@ -71,7 +84,7 @@ export function useImageProcessor() {
             return
         }
 
-        setProcessingState({ status: "processing" });
+        setProcessingState({ status: "processing", previousOutput: processedOutput });
 
         try {
             const result = await processImage(selectedFile, options);
@@ -80,8 +93,10 @@ export function useImageProcessor() {
 
             setProcessingState({
                 status: "success",
-                result,
-                previewURL: resultURL,
+                output: {
+                    result,
+                    previewURL: resultURL
+                }
             });
         } catch (error) {
             const message =
@@ -92,6 +107,7 @@ export function useImageProcessor() {
             setProcessingState({
                 status: "error",
                 message,
+                previousOutput: processedOutput
             });
         }
     }
