@@ -168,13 +168,23 @@ function App() {
         </div>
       </div>
 
-      {processingState.status === "processing" && (
-        <p role="status">Processing image…</p>
-      )}
+      <div className="status-region" aria-live="polite">
+        {processingState.status === "processing" && (
+          <p role="status">
+            {processedResult
+              ? "Updating image… Showing the previous result."
+              : "Processing image…"}
+          </p>
+        )}
 
-      {processingState.status === "error" && (
-        <p role="alert">{processingState.message}</p>
-      )}
+        {processingState.status === "success" && (
+          <p>Image optimized successfully.</p>
+        )}
+
+        {processingState.status === "error" && (
+          <p role="alert">{processingState.message}</p>
+        )}
+      </div>
 
       {selectedFile && (
         <button
@@ -191,7 +201,10 @@ function App() {
       )}
 
       {selectedFile && processedResult && (
-        <section className="comparison">
+        <section
+          className="comparison"
+          aria-busy={processingState.status === "processing"}
+        >
           <h2 id="image-comparison-heading">Image comparison</h2>
 
           <div
