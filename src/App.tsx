@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { calculateSizeChange } from "./image-processing/calculateSizeChange";
 import type { ChangeEvent } from "react";
 import { useImageProcessor } from "./hooks/useImageProcessor";
@@ -23,11 +23,13 @@ function App() {
     processedResult,
     selectFile,
     optimizeImage,
+    reset,
   } = useImageProcessor();
   const [outputMimeType, setOutputMimeType] =
     useState<OutputMimeType>("image/webp");
   const [compressionQuality, setCompressionQuality] = useState<number>(82);
   const [outputFileName, setOutputFileName] = useState("");
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     // e.currentTarget.files is an array-like object
@@ -65,6 +67,15 @@ function App() {
       ? calculateSizeChange(selectedFile.size, processedResult.blob.size)
       : null;
 
+  const handleReset = () => {
+    reset();
+    setOutputFileName("");
+
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
+      imageInputRef.current.focus();
+    }
+  };
   return (
     <main>
       <h1>Browser photo lab</h1>
@@ -74,6 +85,7 @@ function App() {
           <label htmlFor="image-file">Image file</label>
           <input
             id="image-file"
+            ref={imageInputRef}
             type="file"
             accept="image/*"
             onChange={handleFileSelect}
@@ -186,20 +198,33 @@ function App() {
         )}
       </div>
 
-      {selectedFile && (
-        <button
-          type="button"
-          onClick={handleOptimize}
-          disabled={
-            processingState.status === "processing" || !isMaxDimensionValid
-          }
-        >
-          {processingState.status === "processing"
-            ? "Optimizing..."
-            : "Optimize image"}
-        </button>
-      )}
+      <div className="action-buttons">
+        {selectedFile && (
+          <button
+            type="button"
+            id="optimize-button"
+            onClick={handleOptimize}
+            disabled={
+              processingState.status === "processing" || !isMaxDimensionValid
+            }
+          >
+            {processingState.status === "processing"
+              ? "Optimizing..."
+              : "Optimize image"}
+          </button>
+        )}
 
+        {processingState.status !== "idle" && (
+          <button
+            type="button"
+            id="reset-button"
+            onClick={handleReset}
+            disabled={processingState.status === "processing"}
+          >
+            Start over
+          </button>
+        )}
+      </div>
       {selectedFile && processedResult && (
         <section
           className="comparison"

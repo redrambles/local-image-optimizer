@@ -358,3 +358,69 @@ test("keeps the previous output while reprocessing and shows a new output after 
 
     expect(revokeObjectURLMock).toHaveBeenCalledWith("blob:second-processed-preview")
 })
+
+test("resets image state and revokes its preview URLs", async () => {
+
+    const file = new File(["image contents"], "mouse.jpg", {
+        type: "image/jpeg",
+    })
+
+    const options: ProcessImageOptions = {
+        maxDimension: 1000,
+        mimeType: "image/webp",
+        quality: 0.82,
+    }
+
+    const firstProcessedResult: ProcessImageResult = {
+        blob: new Blob(["first processed Image"], {
+            type: "image/webp"
+        }),
+        originalDimensions: {
+            width: 1200,
+            height: 800,
+        },
+        processedDimensions: {
+            width: 1000,
+            height: 667,
+        }
+    };
+
+    processImageMock.mockResolvedValueOnce(firstProcessedResult);
+
+    createObjectURLMock
+        .mockReturnValueOnce("blob:original-preview")
+        .mockReturnValueOnce("blob:first-processed-preview")
+
+    const { result, unmount } = renderHook(() => useImageProcessor());
+
+    act(() => result.current.selectFile(file));
+
+    await act(async () => {
+        await result.current.optimizeImage(options)
+    });
+
+    expect(result.current.processingState.status).toBe("success");
+    expect(result.current.processedResult).toBe(firstProcessedResult);
+    expect(result.current.processedPreviewURL).toBe(
+        "blob:first-processed-preview"
+    );
+
+    act(() => {
+        result.current.reset();
+    });
+
+    expect(result.current.selectedFile).toBe(null);
+    expect(result.current.originalPreviewURL).toBe(null);
+    expect(result.current.processedPreviewURL).toBe(null);
+    expect(result.current.processedResult).toBe(null);
+    expect(result.current.processingState).toEqual({
+        status: "idle"
+    });
+    expect(revokeObjectURLMock).toHaveBeenCalledWith(
+        "blob:original-preview",
+    );
+    expect(revokeObjectURLMock).toHaveBeenCalledWith(
+        "blob:first-processed-preview",
+    );
+    unmount();
+});

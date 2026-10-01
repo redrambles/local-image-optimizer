@@ -112,6 +112,12 @@ export function useImageProcessor() {
         }
     }
 
+    function reset(): void {
+        setSelectedFile(null);
+        setOriginalPreviewURL(null);
+        setProcessingState({ status: "idle" });
+    }
+
     return {
         selectedFile,
         processingState,
@@ -119,6 +125,7 @@ export function useImageProcessor() {
         processedPreviewURL,
         processedResult,
         selectFile,
-        optimizeImage
+        optimizeImage,
+        reset
     }
 };
