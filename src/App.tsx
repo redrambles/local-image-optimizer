@@ -32,7 +32,6 @@ function App() {
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
-    // e.currentTarget.files is an array-like object
     const file = e.currentTarget.files?.[0];
 
     if (!file) {

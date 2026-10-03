@@ -1,6 +1,55 @@
 # Browser photo lab
 
-Browser-first image optimization with React and TypeScript. Images are decoded, resized, and re-encoded locally; the processed result can be previewed and downloaded without uploading the original.
+Browser-first image optimization with React and TypeScript. Images are decoded,
+resized, and re-encoded locally; the processed result can be previewed and
+downloaded without uploading the original.
+
+## Features
+
+- Process images entirely in the browser without uploading them.
+- Limit the longest image dimension without enlarging smaller images.
+- Encode WebP, JPEG, or PNG output.
+- Adjust compression quality for lossy formats.
+- Compare original and processed dimensions, formats, and file sizes.
+- Preview, rename, and download the processed image.
+- Preserve the previous result while reprocessing or recovering from an error.
+
+## How it works
+
+The selected `File` is decoded into an `ImageBitmap`. The app calculates target
+dimensions, draws the bitmap onto an in-memory Canvas, and encodes the Canvas as
+a new `Blob`. Object URLs provide local previews and downloads, and are revoked
+when they are replaced, reset, or no longer needed.
+
+```text
+File -> ImageBitmap -> Canvas -> Blob -> object URL -> preview/download
+```
+
+## Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+Then open the local URL printed by Vite.
+
+## Quality checks
+
+```bash
+npm test -- --run
+npm run typecheck
+npm run lint
+npm run build
+```
+
+The test suite covers image-processing utilities, the processing lifecycle hook,
+object-URL cleanup, and the main user workflows.
+
+## Privacy
+
+Image decoding, resizing, encoding, previewing, and downloading all happen on
+the user's device. Version 1 does not upload or persist selected images.
 
 ## Roadmap
 
@@ -20,13 +69,13 @@ Adventures project, which can later reuse the processing work developed here.
 ### Version 1.0
 
 - [x] Extract the processing lifecycle, React state, and object-URL cleanup into a `useImageProcessor()` hook.
-- [ ] Add controls for maximum dimension, output format, compression quality, and output filename.
+- [x] Add controls for maximum dimension, output format, compression quality, and output filename.
 - [x] Introduce an explicit Optimize action so selecting a file and processing it are separate steps.
-- [ ] Complete the idle, ready, processing, success, error, reset, and reprocess experiences.
-  - [ ] Preserve the previous preview and comparison while reprocessing, with a visible updating state.
-- [ ] Add focused tests for the processing lifecycle and user-facing workflow.
-- [ ] Remove learning-only console output.
-- [ ] Complete an accessibility, narrow-screen, documentation, and production-build review.
+- [x] Complete the idle, ready, processing, success, error, reset, and reprocess experiences.
+  - [x] Preserve the previous preview and comparison while reprocessing, with a visible updating state.
+- [x] Add focused tests for the processing lifecycle and user-facing workflow.
+- [x] Remove learning-only console output.
+- [x] Complete an accessibility, narrow-screen, documentation, and production-build review.
 
 ### Follow-up releases
 
@@ -55,75 +104,3 @@ Adventures project, which can later reuse the processing work developed here.
 Storybook is optional for this project. It is likely to provide more value first
 in Mouse and Bug's Adventures, where there are reusable visual components and
 more application states to develop in isolation.
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
-
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
-
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```

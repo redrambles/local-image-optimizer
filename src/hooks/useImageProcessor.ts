@@ -71,7 +71,7 @@ export function useImageProcessor() {
 
             return;
         }
-        // We have an image, now let's create a preview and process it
+        // We have an image, now let's create a preview
         const objectURL = URL.createObjectURL(file);
 
         setSelectedFile(file);
