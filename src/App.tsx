@@ -72,7 +72,7 @@ function App() {
     setOutputFileName("");
 
     if (imageInputRef.current) {
-      imageInputRef.current.value = "";
+      imageInputRef.current.value = ""; // Have to reach into the DOM node with a ref to clear the input and focus
       imageInputRef.current.focus();
     }
   };
@@ -283,19 +283,7 @@ function App() {
         </section>
       )}
       {originalPreviewURL && selectedFile && (
-        <img
-          src={originalPreviewURL}
-          alt={`Preview of ${selectedFile.name}`}
-          onLoad={(e) => {
-            const image = e.currentTarget;
-            console.table({
-              naturalWidth: image.naturalWidth,
-              naturalHeight: image.naturalHeight,
-              displayedWidth: image.clientWidth,
-              displayedHeight: image.clientHeight,
-            });
-          }}
-        />
+        <img src={originalPreviewURL} alt={`Preview of ${selectedFile.name}`} />
       )}
 
       {processedPreviewURL && selectedFile && downloadName && (
@@ -305,16 +293,6 @@ function App() {
           <img
             src={processedPreviewURL}
             alt={`Processed preview of ${selectedFile.name}`}
-            onLoad={(event) => {
-              const image = event.currentTarget;
-
-              console.table({
-                processedNaturalWidth: image.naturalWidth,
-                processedNaturalHeight: image.naturalHeight,
-                processedDisplayedWidth: image.clientWidth,
-                processedDisplayedHeight: image.clientHeight,
-              });
-            }}
           />
           <a
             className="download-link"
