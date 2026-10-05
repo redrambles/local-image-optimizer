@@ -77,7 +77,8 @@ function App() {
   };
   return (
     <main>
-      <h1>Browser photo lab</h1>
+      <h1>Local Image Optimizer</h1>
+      <p>Resize and compress images privately in your browser.</p>
       <p>Choose an image to inspect and process locally.</p>
       <div className="controls">
         <div className="control">

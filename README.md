@@ -1,4 +1,4 @@
-# Browser photo lab
+# Local Image optimizer
 
 Browser-first image optimization with React and TypeScript. Images are decoded,
 resized, and re-encoded locally; the processed result can be previewed and
