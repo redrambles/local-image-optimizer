@@ -52,7 +52,7 @@ export async function processImage(
         const context = canvas.getContext("2d");
 
         if (!context) {
-            throw new Error("A 2D canvas context could not be created. Alas.")
+            throw new Error("A 2D canvas context could not be created.")
         }
 
         context.drawImage(bitmap, 0, 0, processedDimensions.width, processedDimensions.height);

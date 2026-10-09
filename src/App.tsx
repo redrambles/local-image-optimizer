@@ -1,7 +1,7 @@
 import "./App.css";
 import { useState, useRef } from "react";
 import { calculateSizeChange } from "./image-processing/calculateSizeChange";
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, DragEvent as ReactDragEvent } from "react";
 import { useImageProcessor } from "./hooks/useImageProcessor";
 import { isValidMaxDimension } from "./image-processing/isValidMaxDimension";
 import type { OutputMimeType } from "./image-processing/processImage";
@@ -29,18 +29,58 @@ function App() {
     useState<OutputMimeType>("image/webp");
   const [compressionQuality, setCompressionQuality] = useState<number>(82);
   const [outputFileName, setOutputFileName] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0];
 
-    if (!file) {
-      return;
+    if (file) {
+      handleImageFile(file);
     }
-    const originalNameWithoutExtension = file.name.replace(/\.[^.]+$/, "");
+  };
 
+  const handleImageFile = (file: File) => {
+    const originalNameWithoutExtension = file.name.replace(/\.[^.]+$/, "");
     setOutputFileName(`${originalNameWithoutExtension}-optimized`);
     selectFile(file);
+  };
+
+  const handleDragEnter = (event: ReactDragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+
+    if (processingState.status !== "processing") {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragOver = (event: ReactDragEvent<HTMLDivElement>) => {
+    // To allow our div to receive the drop we need to cancel drag over
+    event.preventDefault();
+  };
+
+  const handleDragLeave = (event: ReactDragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (event: ReactDragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+
+    if (processingState.status === "processing") {
+      return;
+    }
+
+    const file = event.dataTransfer.files?.[0];
+
+    if (!file) return;
+
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
+    }
+
+    handleImageFile(file);
   };
 
   const handleOptimize = async () => {
@@ -66,31 +106,73 @@ function App() {
       ? calculateSizeChange(selectedFile.size, processedResult.blob.size)
       : null;
 
+  const fileSelectionError =
+    processingState.status === "error" && !selectedFile
+      ? processingState.message
+      : null;
+
   const handleReset = () => {
     reset();
     setOutputFileName("");
 
     if (imageInputRef.current) {
-      imageInputRef.current.value = ""; // Have to reach into the DOM node with a ref to clear the input and focus
+      imageInputRef.current.value = ""; // Reach into the DOM node to clear the input and focus
       imageInputRef.current.focus();
     }
   };
+
+  const dropZoneClasses = [
+    "control",
+    "drop-zone",
+    isDragging && "drop-zone--active",
+    fileSelectionError && "drop-zone--error",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <main>
       <h1>Local Image Optimizer</h1>
       <p>Resize and compress images privately in your browser.</p>
       <p>Choose an image to inspect and process locally.</p>
       <div className="controls">
-        <div className="control">
-          <label htmlFor="image-file">Image file</label>
-          <input
-            id="image-file"
-            ref={imageInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            disabled={processingState.status === "processing"}
-          />
+        <div className="file-control">
+          <div
+            className={dropZoneClasses}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <label htmlFor="image-file">Image file</label>
+            <p id="image-file-instructions" className="drop-zone-instructions">
+              Drop an image here or choose a file.
+            </p>
+            <input
+              id="image-file"
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              aria-invalid={fileSelectionError ? true : undefined}
+              aria-describedby={
+                fileSelectionError
+                  ? "image-file-instructions image-file-error"
+                  : "image-file-instructions"
+              }
+              onChange={handleFileSelect}
+              disabled={processingState.status === "processing"}
+            />
+          </div>
+
+          {fileSelectionError && (
+            <p
+              id="image-file-error"
+              className="file-selection-error"
+              role="alert"
+            >
+              {fileSelectionError}
+            </p>
+          )}
         </div>
         <div className="control">
           <label htmlFor="max-dimension">Maximum width or height (px)</label>
@@ -193,7 +275,7 @@ function App() {
           <p>Image optimized successfully.</p>
         )}
 
-        {processingState.status === "error" && (
+        {processingState.status === "error" && selectedFile && (
           <p role="alert">{processingState.message}</p>
         )}
       </div>

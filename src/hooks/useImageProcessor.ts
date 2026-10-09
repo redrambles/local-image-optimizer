@@ -59,7 +59,6 @@ export function useImageProcessor() {
     }, [processedPreviewURL]);
 
     function selectFile(file: File): void {
-        // More important for when we support drag-and-drop
         if (!file.type.startsWith("image/")) {
             setSelectedFile(null);
             setOriginalPreviewURL(null);

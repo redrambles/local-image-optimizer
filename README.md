@@ -7,6 +7,7 @@ downloaded without uploading the original.
 ## Features
 
 - Process images entirely in the browser without uploading them.
+- Select images with the file picker or by dragging and dropping them.
 - Limit the longest image dimension without enlarging smaller images.
 - Encode WebP, JPEG, or PNG output.
 - Adjust compression quality for lossy formats.
@@ -81,8 +82,8 @@ Adventures project, which can later reuse the processing work developed here.
 
 #### Version 1.1 — Drag and drop
 
-- [ ] Accept images from an accessible drop zone.
-- [ ] Route the file picker and drop zone through one shared image entry point.
+- [x] Accept images from an accessible drop zone.
+- [x] Route the file picker and drop zone through one shared image entry point.
 
 #### Version 1.2 — Clipboard paste
 

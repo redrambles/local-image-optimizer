@@ -6,6 +6,8 @@ main {
 
 h1 {
   margin-bottom: 0.5rem;
+  text-align: center;
+  padding-bottom: 1rem;
 }
 
 p {
@@ -56,6 +58,53 @@ img {
 
 #max-dimension[aria-invalid="true"] {
   border-color: #b3261e;
+}
+
+.file-control {
+  flex: 0 0 100%;
+  display: grid;
+  gap: 0.5rem;
+  margin-block: 2rem;
+}
+
+.drop-zone {
+  justify-content: center;
+  text-align: center;
+  padding: 1rem;
+  border: 2px dashed #9aa0a6;
+  border-radius: 0.75rem;
+  background-color: white;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.drop-zone--error {
+  border-color: #b3261e;
+}
+
+.drop-zone--active {
+  border-color: #137333;
+  background-color: #e6f4ea;
+}
+
+.file-selection-error {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid #b3261e;
+  border-radius: 0.375rem;
+  background-color: #fce8e6;
+  color: #8c1d18;
+  font-weight: 700;
+}
+
+.drop-zone-instructions {
+  padding-bottom: 1rem;
+  margin: 0;
+}
+
+.drop-zone input[type="file"] {
+  width: 100%;
 }
 
 .download-link {
