@@ -1,8 +1,10 @@
-# Local Image optimizer
+# Local Image Optimizer
 
 Browser-first image optimization with React and TypeScript. Images are decoded,
 resized, and re-encoded locally; the processed result can be previewed and
 downloaded without uploading the original.
+
+![Local Image Optimizer interface](docs/local-image-optimizer.png)
 
 ## Features
 
